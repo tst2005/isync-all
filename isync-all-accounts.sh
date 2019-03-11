@@ -9,19 +9,24 @@ if [ ! -d "$configdir" ]; then
 	exit 1
 fi
 
+logfile=bckall.log
+>"$logfile"
 err=0
 for cfg in "$configdir"/*.conf; do
-	echo ""
-	echo "#### $cfg"
-	./isync-account.sh "$cfg"
+	echo "" >>"$logfile"
+	echo "#### $cfg" >>"$logfile"
+	./isync-account.sh "$cfg" >>"$logfile" 2>&1
 	ret=$?
 	if [ $ret -ne 0 ]; then
-		echo "# Status: ERROR ($ret)"
+		echo "# Status: ERROR ($ret)" >>"$logfile"
 		err=1
 	else
-		echo "# Status: SUCCESS"
+		echo "# Status: SUCCESS" >>"$logfile"
 	fi
-	echo "###################################"
-done 2>&1 |tee bckall.log
+	echo "###################################" >>"$logfile"
+done
+if [ $err -ne 0 ]; then
+	cat -- "$logfile"
+fi
 
 exit $err
